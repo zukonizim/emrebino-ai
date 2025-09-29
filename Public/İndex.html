@@ -1,1 +1,48 @@
-
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>EmreBino.AI | Yapay Zeka</title>
+<style>
+:root{--mat-black:#0b0b0b;--neon-red:#ff073a;--muted:#bdbdbd;}
+body{margin:0;font-family:'Segoe UI',Tahoma, Geneva, Verdana, sans-serif;background:var(--mat-black);color:var(--muted);}
+header{padding:20px;text-align:center;border-bottom:2px solid rgba(255,7,58,0.3);}
+h1{margin:0;color:var(--neon-red);}
+.container{max-width:900px;margin:20px auto;padding:20px;border-radius:12px;background:#111;}
+.chat-box{height:350px;overflow-y:auto;padding:15px;background:#0b0b0b;border-radius:10px;display:flex;flex-direction:column;gap:10px;}
+.message{max-width:70%;padding:10px 14px;border-radius:12px;line-height:1.4;}
+.user{align-self:flex-end;background:var(--neon-red);color:#111;}
+.ai{align-self:flex-start;background:#111;color:var(--neon-red);border:1px solid rgba(255,7,58,0.3);}
+.controls{display:flex;gap:10px;margin-top:10px;}
+input[type="text"]{flex:1;padding:10px;border-radius:10px;border:none;background:#222;color:var(--muted);}
+button{padding:10px;background:var(--neon-red);border:none;color:#fff;border-radius:10px;cursor:pointer;}
+</style>
+</head>
+<body>
+<header><h1>EmreBino.AI</h1></header>
+<main class="container">
+<div id="chatBox" class="chat-box"></div>
+<div class="controls">
+<input id="userInput" type="text" placeholder="Mesajınızı yazın..." onkeydown="if(event.key==='Enter') sendMessage()">
+<button onclick="sendMessage()">Gönder</button>
+</div>
+</main>
+<script>
+const chatBox=document.getElementById('chatBox');
+const input=document.getElementById('userInput');
+async function sendMessage(){
+let text=input.value.trim(); if(!text) return;
+appendMessage(text,'user'); input.value='';
+appendMessage('Düşünüyorum...','ai');
+try{
+const resp=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:text})});
+const json=await resp.json();
+const last=chatBox.querySelector('.message.ai:last-child'); if(last) last.remove();
+appendMessage(json.text || 'AI boş cevap verdi.','ai');
+}catch(err){appendMessage('Sunucuya bağlanamadı: '+err.message,'ai');}
+}
+function appendMessage(text,sender){const d=document.createElement('div');d.className='message '+sender;d.textContent=text;chatBox.appendChild(d);chatBox.scrollTop=chatBox.scrollHeight;}
+</script>
+</body>
+</html>
